@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Excel Processor</title>
+</head>
+<body>
+    <h2>Upload Excel File for Processing</h2>
+
+    <form method="post" enctype="multipart/form-data">
+        <label for="file">Select Excel File:</label><br>
+        <input type="file" name="file" id="file" required><br><br>
+
+        <label>Select Processing Options:</label><br>
+        <input type="checkbox" name="options" value="gender"> Gender<br>
+        <input type="checkbox" name="options" value="material"> Material<br>
+        <input type="checkbox" name="options" value="style"> Style<br>
+        <input type="checkbox" name="options" value="color"> Color<br>
+        <input type="checkbox" name="options" value="size"> Size<br>
+        <input type="checkbox" name="options" value="shape"> Shape<br><br>
+
+        <input type="submit" value="Upload and Process">
+        <input type="reset" value="Reset">
+    </form>
+</body>
+</html>
