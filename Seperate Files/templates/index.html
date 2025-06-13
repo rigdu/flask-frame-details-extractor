@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Extractor Tool</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; margin-top: 50px; }
+        .upload-box {
+            width: 300px; margin: auto; padding: 30px; border: 2px dashed #aaa;
+        }
+    </style>
+</head>
+<body>
+    <h1>Upload Excel File (.xlsx)</h1>
+    <div class="upload-box">
+        <form method="post" enctype="multipart/form-data">
+            <input type="file" name="file" accept=".xlsx" required><br><br>
+            <button type="submit">Upload & Process</button>
+        </form>
+    </div>
+</body>
+</html>
