@@ -120,43 +120,53 @@ def extract_color(detail):
     if not isinstance(detail, str):
         return None
 
-    detail = detail.upper()
+        detail = detail.upper()
     tokens = detail.strip().split()
 
-    # Priority 1: Match C-XXX and return clean part
+    # Words to ignore as invalid color values
+    ignore_words = {'METAL', 'SUPRA', 'R/L', 'SPG', 'META', 'RIM', 'WASHER', 'TITAN', 'PLASTIC', 'SHELL'}
+
+    # Priority 1: C-XXX
     for token in tokens:
         if token.startswith("C-"):
-            return token[2:].split("-")[0]
+            result = token[2:].split("-")[0]
+            if result not in ignore_words:
+                return result
 
-    # Priority 2: Match C123 (C followed by digits)
+    # Priority 2: C123
     for token in tokens:
         if re.match(r'^C\d+$', token):
-            return token[1:]
+            result = token[1:]
+            if result not in ignore_words:
+                return result
 
-    # Priority 3: Return the 2nd token if it's alphanumeric (e.g. BZS, 0F1, 278, WZP)
+    # Priority 3: Second token
     if len(tokens) >= 2:
         second = tokens[1]
-        if re.match(r'^[A-Z0-9]{2,6}$', second):
+        if re.match(r'^[A-Z0-9]{2,6}$', second) and second not in ignore_words:
             return second
 
-    # Priority 4: Return alphanumeric token before frame size (e.g. WZP before 50-18-140)
+    # Priority 4: Before size
     for i in range(1, len(tokens)):
-        if re.match(r'\d{2}-\d{2}-\d{3}', tokens[i]) and i > 0:
+        if re.match(r'\d{2}-\d{2}-\d{3}', tokens[i]):
             before = tokens[i-1]
-            if re.match(r'^[A-Z0-9]{2,6}$', before):
+            if re.match(r'^[A-Z0-9]{2,6}$', before) and before not in ignore_words:
                 return before
 
-    # Priority 5: Match hyphenated numbers (e.g., 6193-2502-51) → extract 2502
+    # Priority 5: 6193-2502-51
     match = re.search(r'\b\d{3,5}-(\d{2,5})-\d{2,5}\b', detail)
     if match:
-        return match.group(1)
+        result = match.group(1)
+        if result not in ignore_words:
+            return result
 
-    # Priority 6: Return third-last token if it matches known formats (e.g. RDGY)
+    # Priority 6: Third from last
     if len(tokens) >= 3 and re.match(r'\d{2}-\d{2}-\d{3}', tokens[-2]):
-        return tokens[-3]
+        result = tokens[-3]
+        if result not in ignore_words:
+            return result
 
     return None
-
 # ---------- Flask Routes ----------
 
 @app.route('/', methods=['GET', 'POST'])
