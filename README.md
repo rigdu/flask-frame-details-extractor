@@ -41,3 +41,11 @@ Go to [http://localhost:5000](http://localhost:5000) in your browser.
 - Make sure your file contains a `Details` column.
 
 ---
+File Structure
+flask-frame-details-extractor/
+│
+├── app.py
+├── uploads/         # (auto-created, for uploads)
+├── outputs/         # (auto-created, for outputs)
+├── templates/
+│   └── index.html   # HTML form for upload and options
