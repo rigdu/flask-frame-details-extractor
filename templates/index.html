@@ -1,25 +1,204 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" data-bs-theme="dark">
 <head>
-    <title>Excel Processor</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Processor - Frame Data Extraction</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <h2>Upload Excel File for Processing</h2>
+    <div class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow">
+                    <div class="card-header text-center">
+                        <h2 class="mb-0">
+                            <i class="fas fa-file-excel text-success me-2"></i>
+                            Excel Frame Data Processor
+                        </h2>
+                        <p class="text-muted mb-0">Extract eyewear frame specifications from Excel files</p>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                            <!-- File Upload Section -->
+                            <div class="mb-4">
+                                <label for="file" class="form-label fw-bold">
+                                    <i class="fas fa-upload me-2"></i>Select Excel File
+                                </label>
+                                <input type="file" 
+                                       class="form-control form-control-lg" 
+                                       name="file" 
+                                       id="file" 
+                                       accept=".xlsx,.xls" 
+                                       required>
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Upload an Excel file containing frame details in a 'Details' column
+                                </div>
+                                <div class="invalid-feedback">
+                                    Please select a valid Excel file.
+                                </div>
+                            </div>
 
-    <form method="post" enctype="multipart/form-data">
-        <label for="file">Select Excel File:</label><br>
-        <input type="file" name="file" id="file" required><br><br>
+                            <!-- Processing Options Section -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold mb-3">
+                                    <i class="fas fa-cogs me-2"></i>Select Data to Extract
+                                </label>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="form-check form-check-lg">
+                                            <input class="form-check-input" type="checkbox" name="options" value="gender" id="gender">
+                                            <label class="form-check-label" for="gender">
+                                                <i class="fas fa-venus-mars me-2 text-info"></i>Gender
+                                                <small class="text-muted d-block">Extract gender classification (L/G/U)</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check form-check-lg">
+                                            <input class="form-check-input" type="checkbox" name="options" value="material" id="material">
+                                            <label class="form-check-label" for="material">
+                                                <i class="fas fa-cube me-2 text-warning"></i>Material
+                                                <small class="text-muted d-block">Frame material (Metal/Titanium/Plastic)</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check form-check-lg">
+                                            <input class="form-check-input" type="checkbox" name="options" value="style" id="style">
+                                            <label class="form-check-label" for="style">
+                                                <i class="fas fa-eye me-2 text-primary"></i>Style
+                                                <small class="text-muted d-block">Frame style (Full/Rimless/Supra)</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check form-check-lg">
+                                            <input class="form-check-input" type="checkbox" name="options" value="color" id="color">
+                                            <label class="form-check-label" for="color">
+                                                <i class="fas fa-palette me-2 text-danger"></i>Color
+                                                <small class="text-muted d-block">Frame color code</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check form-check-lg">
+                                            <input class="form-check-input" type="checkbox" name="options" value="size" id="size">
+                                            <label class="form-check-label" for="size">
+                                                <i class="fas fa-ruler me-2 text-success"></i>Size
+                                                <small class="text-muted d-block">Lens width (46-70mm)</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check form-check-lg">
+                                            <input class="form-check-input" type="checkbox" name="options" value="shape" id="shape">
+                                            <label class="form-check-label" for="shape">
+                                                <i class="fas fa-shapes me-2 text-secondary"></i>Shape
+                                                <small class="text-muted d-block">Frame shape (Round/Square/Aviator/etc.)</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-        <label>Select Processing Options:</label><br>
-        <input type="checkbox" name="options" value="gender"> Gender<br>
-        <input type="checkbox" name="options" value="material"> Material<br>
-        <input type="checkbox" name="options" value="style"> Style<br>
-        <input type="checkbox" name="options" value="color"> Color<br>
-        <input type="checkbox" name="options" value="size"> Size<br>
-        <input type="checkbox" name="options" value="shape"> Shape<br><br>
+                            <!-- Action Buttons -->
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-between">
+                                <button type="submit" class="btn btn-primary btn-lg px-4">
+                                    <i class="fas fa-play me-2"></i>Process File
+                                </button>
+                                <button type="reset" class="btn btn-outline-secondary btn-lg px-4">
+                                    <i class="fas fa-undo me-2"></i>Reset Form
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
 
-        <input type="submit" value="Upload and Process">
-        <input type="reset" value="Reset">
-    </form>
+                <!-- Instructions Card -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-question-circle me-2"></i>How to Use
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-file-upload text-primary me-2"></i>File Requirements</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-check text-success me-2"></i>Excel format (.xlsx or .xls)</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Must contain a 'Details' column</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Frame specifications in text format</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-download text-success me-2"></i>Output</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-check text-success me-2"></i>Original data preserved</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>New columns for extracted data</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Automatic download when complete</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Form Validation Script -->
+    <script>
+        // Bootstrap form validation
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+                var forms = document.getElementsByClassName('needs-validation');
+                var validation = Array.prototype.filter.call(forms, function(form) {
+                    form.addEventListener('submit', function(event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+
+        // File input enhancement
+        document.getElementById('file').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const fileSize = (file.size / 1024 / 1024).toFixed(2);
+                const formText = e.target.nextElementSibling;
+                formText.innerHTML = `<i class="fas fa-file-check text-success me-1"></i>Selected: ${file.name} (${fileSize} MB)`;
+            }
+        });
+
+        // Select all/none functionality
+        const selectAllBtn = document.createElement('button');
+        selectAllBtn.type = 'button';
+        selectAllBtn.className = 'btn btn-outline-info btn-sm mb-3';
+        selectAllBtn.innerHTML = '<i class="fas fa-check-double me-1"></i>Select All';
+        selectAllBtn.onclick = function() {
+            const checkboxes = document.querySelectorAll('input[name="options"]');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            checkboxes.forEach(cb => cb.checked = !allChecked);
+            this.innerHTML = allChecked ? 
+                '<i class="fas fa-check-double me-1"></i>Select All' : 
+                '<i class="fas fa-times me-1"></i>Clear All';
+        };
+
+        const optionsLabel = document.querySelector('label[for] + label.form-label');
+        if (optionsLabel) {
+            optionsLabel.parentNode.insertBefore(selectAllBtn, optionsLabel.nextSibling);
+        }
+    </script>
 </body>
 </html>
