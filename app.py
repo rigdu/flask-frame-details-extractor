@@ -187,7 +187,18 @@ def index():
         file.save(filepath)
         df = pd.read_excel(filepath)
 
-        # Apply extraction functions based on selected options
+# ✅ Check if 'Details' column is present
+if 'Details' not in df.columns:
+    return "⚠️ Error: 'Details' column not found in uploaded Excel file. Please check the header."
+
+# 🔍 DEBUG: Print Excel columns and first few rows from 'Details' column
+print("Columns:", df.columns.tolist())
+if 'Details' in df.columns:
+    print(df[['Details']].head())
+else:
+    print("❌ 'Details' column NOT FOUND.")
+       
+    # Apply extraction functions based on selected options
         if 'gender' in options and 'Details' in df.columns:
             df['GENDER'] = df['Details'].apply(extract_gender)
         if 'material' in options and 'Details' in df.columns:
