@@ -19,7 +19,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 def extract_gender(text):
     """
     Extracts gender ('Ladies', 'Gents', 'Unisex') from a detail string.
-    Looks for L, G, or U as the third or later token.
+    Looks for L, G, or U as the third or later token (case-insensitive).
     """
     if not isinstance(text, str):
         return ''
@@ -32,8 +32,8 @@ def extract_gender(text):
 
 def extract_material(detail):
     """
-    Extracts material type from the detail string.
-    Looks for keywords like TITAN, METAL, SHELL, or PLASTIC.
+    Extracts material type (e.g., 'TITANIUM', 'METAL', 'PLASTICS') from the detail string.
+    Identifies material based on predefined keywords.
     """
     if not isinstance(detail, str):
         return None
@@ -48,8 +48,8 @@ def extract_material(detail):
 
 def extract_shape(detail):
     """
-    Extracts frame shape from keywords in the detail string.
-    Uses a mapping of shape names to possible keywords.
+    Extracts frame shape (e.g., 'Round', 'Rectangle', 'Aviator') from keywords in the detail string.
+    Uses a comprehensive mapping of shape names to possible keywords.
     """
     if not isinstance(detail, str):
         return None
@@ -72,7 +72,7 @@ def extract_shape(detail):
 
 def extract_style(detail):
     """
-    Extracts style (Full Rim, Rimless, Supra) from keywords in the detail string.
+    Extracts style (e.g., 'Full Rim', 'Rimless', 'Supra') from keywords in the detail string.
     """
     if not isinstance(detail, str):
         return None
@@ -87,7 +87,7 @@ def extract_style(detail):
 
 def extract_frame_size(detail):
     """
-    Extracts frame size from patterns like '49-18-135' or standalone numbers (46–70).
+    Extracts frame size from patterns like '49-18-135' or standalone numbers (46-70).
     Returns the first valid match as an integer.
     """
     if not isinstance(detail, str):
@@ -95,12 +95,12 @@ def extract_frame_size(detail):
 
     detail = detail.upper()
 
-    # Pattern: e.g. '49-18-135'
+    # Pattern: e.g. '49-18-135' (eye size, bridge size, temple length)
     match_full = re.search(r'\b([4-6][0-9]|70)-\d{1,2}-\d{2,3}\b', detail)
     if match_full:
         return int(match_full.group(1))
 
-    # Standalone number after C-XXX or generally between 46–70
+    # Standalone number typically representing eye size (between 46 and 70)
     match_number = re.findall(r'\b([4-6][0-9]|70)\b', detail)
     if match_number:
         return int(match_number[0])  # Return the first valid match
@@ -109,96 +109,106 @@ def extract_frame_size(detail):
 
 def extract_color(detail):
     """
-    Extracts color code from the detail string using several prioritized rules:
-    1. C-XXX pattern
-    2. C followed by digits (C123)
-    3. Second token if alphanumeric
-    4. Token before frame size
-    5. Hyphenated numbers (e.g., 6193-2502-51 → 2502)
-    6. Third-last token if just before frame size
+    Extracts color code from the detail string using a prioritized set of rules:
+    1. 'C-XXX' pattern (e.g., C-1234)
+    2. 'C' followed immediately by digits (e.g., C123)
+    3. Second token if it's alphanumeric and not an ignored word.
+    4. Token immediately preceding a detected frame size pattern.
+    5. Middle part of a hyphenated number sequence (e.g., 6193-2502-51 -> 2502).
+    6. Third-last token if the second-last token is a frame size pattern.
+    Ignores common material/style words to prevent misidentification.
     """
     if not isinstance(detail, str):
         return None
 
-        detail = detail.upper()
+    detail = detail.upper()
     tokens = detail.strip().split()
 
-    # Words to ignore as invalid color values
+    # Words to ignore as invalid color values (e.g., materials, styles)
     ignore_words = {'METAL', 'SUPRA', 'R/L', 'SPG', 'META', 'RIM', 'WASHER', 'TITAN', 'PLASTIC', 'SHELL'}
 
-    # Priority 1: C-XXX
+    # Priority 1: C-XXX pattern
     for token in tokens:
         if token.startswith("C-"):
             result = token[2:].split("-")[0]
             if result not in ignore_words:
                 return result
 
-    # Priority 2: C123
+    # Priority 2: C followed by digits (e.g., C123)
     for token in tokens:
         if re.match(r'^C\d+$', token):
             result = token[1:]
             if result not in ignore_words:
                 return result
 
-    # Priority 3: Second token
+    # Priority 3: Second token if alphanumeric and not an ignored word
     if len(tokens) >= 2:
         second = tokens[1]
         if re.match(r'^[A-Z0-9]{2,6}$', second) and second not in ignore_words:
             return second
 
-    # Priority 4: Before size
+    # Priority 4: Token before frame size (e.g., "BLUE 49-18-135")
     for i in range(1, len(tokens)):
         if re.match(r'\d{2}-\d{2}-\d{3}', tokens[i]):
             before = tokens[i-1]
             if re.match(r'^[A-Z0-9]{2,6}$', before) and before not in ignore_words:
                 return before
 
-    # Priority 5: 6193-2502-51
+    # Priority 5: Middle part of hyphenated numbers (e.g., 6193-2502-51 -> 2502)
     match = re.search(r'\b\d{3,5}-(\d{2,5})-\d{2,5}\b', detail)
     if match:
         result = match.group(1)
         if result not in ignore_words:
             return result
 
-    # Priority 6: Third from last
+    # Priority 6: Third-last token if the second-last is a frame size pattern
     if len(tokens) >= 3 and re.match(r'\d{2}-\d{2}-\d{3}', tokens[-2]):
         result = tokens[-3]
         if result not in ignore_words:
             return result
 
     return None
+
 # ---------- Flask Routes ----------
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
     """
-    Main page: Handles file upload, option selection, and triggers processing.
+    Main page handler:
+    - On GET request, renders the upload form.
+    - On POST request, handles file upload, extracts selected attributes from
+      the 'Details' column of an Excel file, and provides a download link.
     """
     if request.method == 'POST':
-        options = request.form.getlist('options')    # Get which attributes to extract
+        # Get selected attributes from the form (e.g., ['gender', 'material'])
+        options = request.form.getlist('options')
         file = request.files.get('file')
 
+        # Redirect if no file is provided
         if not file or file.filename == '':
             return redirect(request.url)
 
-        # Save the uploaded file
+        # Securely save the uploaded file
         filename = secure_filename(file.filename)
         filepath = os.path.join(UPLOAD_FOLDER, filename)
         file.save(filepath)
+
+        # Read the Excel file into a pandas DataFrame
         df = pd.read_excel(filepath)
 
-# ✅ Check if 'Details' column is present
-if 'Details' not in df.columns:
-    return "⚠️ Error: 'Details' column not found in uploaded Excel file. Please check the header."
+        # Check if 'Details' column exists in the DataFrame
+        if 'Details' not in df.columns:
+            return "⚠️ Error: 'Details' column not found in uploaded Excel file. Please ensure the header is correct."
 
-# 🔍 DEBUG: Print Excel columns and first few rows from 'Details' column
-print("Columns:", df.columns.tolist())
-if 'Details' in df.columns:
-    print(df[['Details']].head())
-else:
-    print("❌ 'Details' column NOT FOUND.")
-       
-    # Apply extraction functions based on selected options
+        # DEBUG: Print DataFrame columns and first few rows of 'Details' column for verification
+        print("Columns in uploaded Excel:", df.columns.tolist())
+        if 'Details' in df.columns:
+            print("First 5 rows of 'Details' column:\n", df[['Details']].head())
+        else:
+            print("❌ 'Details' column was NOT FOUND after reading the file.")
+
+        # Apply extraction functions based on selected options
+        # Each 'if' block checks if the option was selected and if 'Details' column exists
         if 'gender' in options and 'Details' in df.columns:
             df['GENDER'] = df['Details'].apply(extract_gender)
         if 'material' in options and 'Details' in df.columns:
@@ -212,23 +222,25 @@ else:
         if 'color' in options and 'Details' in df.columns:
             df['COLOR'] = df['Details'].apply(extract_color)
 
-        # Save processed file in outputs
-        output_filename = f"multi_output_{filename}"
+        # Save the processed DataFrame to a new Excel file in the outputs directory
+        output_filename = f"processed_{filename}"
         output_path = os.path.join(OUTPUT_FOLDER, output_filename)
         df.to_excel(output_path, index=False)
 
-        # Redirect to the download page for the processed file
+        # Redirect the user to the download page for the newly created file
         return redirect(url_for('download_file', filename=output_filename))
 
+    # For GET requests, render the initial upload form
     return render_template('index.html')
 
 @app.route('/download/<filename>')
 def download_file(filename):
     """
-    Allows downloading of the processed output file.
+    Provides a mechanism to download the processed output file.
     """
     return send_file(os.path.join(OUTPUT_FOLDER, filename), as_attachment=True)
 
-# ---------- Main Entry ----------
+# ---------- Main Entry Point ----------
 if __name__ == '__main__':
+    # Run the Flask application in debug mode for development
     app.run(debug=True)
